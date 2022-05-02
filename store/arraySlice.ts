@@ -7,11 +7,12 @@ interface ArrayState {
   array: ObjectArray;
   swaps: number;
   comparisons: number;
+  lastActivated: [number, number]
 }
 
 const arraySlice = createSlice({
   name: "array",
-  initialState: { array: [], swaps: 0, comparisons: 0 } as ArrayState,
+  initialState: { array: [], swaps: 0, comparisons: 0, lastActivated: [-1, -1] } as ArrayState,
   reducers: {
     setArray: (state, action: PayloadAction<ObjectArray>) => {
       state.array = action.payload;
@@ -37,20 +38,33 @@ const arraySlice = createSlice({
       state.array.splice(toIdx, 0, item);
       state.swaps++;
     },
+    setPivot: (state, action: PayloadAction<number>) => {
+      const pivotIdx = action.payload;
+      const oldPivot = state.array.findIndex(el => el.color === mainTheme.pivotColor);
+
+      if (oldPivot !== -1) state.array[oldPivot].color = mainTheme.mainColor;
+      state.array[pivotIdx].color = mainTheme.pivotColor;
+    },
     goodPair: (
       state,
       action: PayloadAction<{
         idx1: number;
         idx2: number;
-        deactivateAll?: boolean;
         justChecking?: boolean;
       }>
     ) => {
-      const { idx1, idx2, deactivateAll, justChecking } = action.payload;
-      if (deactivateAll)
-        state.array.forEach((el) => (el.color = mainTheme.mainColor));
+      const { idx1, idx2, justChecking } = action.payload;
+    
+      const [last1, last2] = state.lastActivated;
+      if (last1 >= 0 && last2 >=0) {
+        state.array[last1].color = mainTheme.mainColor;
+        state.array[last2].color = mainTheme.mainColor;
+      }
+
       state.array[idx1].color = mainTheme.correctPosColor;
       state.array[idx2].color = mainTheme.correctPosColor;
+      state.lastActivated = [idx1, idx2];
+
       if (justChecking) state.comparisons++;
     },
     wrongPair: (
@@ -58,12 +72,16 @@ const arraySlice = createSlice({
       action: PayloadAction<{
         idx1: number;
         idx2: number;
-        deactivateAll?: boolean;
       }>
     ) => {
-      const { idx1, idx2, deactivateAll } = action.payload;
-      if (deactivateAll)
-        state.array.forEach((el) => (el.color = mainTheme.mainColor));
+      const { idx1, idx2 } = action.payload;
+
+      const [last1, last2] = state.lastActivated;
+      if (last1 >= 0 && last2 >=0) {
+        state.array[last1].color = mainTheme.mainColor;
+        state.array[last2].color = mainTheme.mainColor;
+      }
+
       state.array[idx1].color = mainTheme.wrongPosColor;
       state.array[idx2].color = mainTheme.wrongPosColor;
     },
@@ -76,6 +94,7 @@ const arraySlice = createSlice({
     resetInfo: (state) => {
       state.comparisons = 0;
       state.swaps = 0;
+      state.lastActivated = [-1, -1];
     },
   },
 });
@@ -84,6 +103,7 @@ export const {
   setArray,
   swapElements,
   moveElement,
+  setPivot,
   goodPair,
   wrongPair,
   allSorted,

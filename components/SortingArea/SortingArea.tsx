@@ -1,7 +1,13 @@
 import React, { useState, useEffect, ChangeEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { resetInfo, RootState, setArray, setHeader } from "../../store";
-import { AnimationsArray, generateArray, getBubbleSortAnimations, getMergeSortAnimations } from "../../utils/utils";
+import {
+  AnimationsArray,
+  generateArray,
+  getBubbleSortAnimations,
+  getMergeSortAnimations,
+  getQuickSortAnimations,
+} from "../../utils/utils";
 import {
   SortingBars,
   SortingControls,
@@ -16,7 +22,7 @@ let sliderTimeout: null | NodeJS.Timeout = null;
 let animationDelayDefault = 10;
 let barsNumDefault = 20;
 
-let defaultBarWidth = 500 / barsNumDefault + 'px';
+let defaultBarWidth = 500 / barsNumDefault + "px";
 
 let animationTimersArray: NodeJS.Timeout[] = [];
 
@@ -47,16 +53,20 @@ function SortingArea() {
     setIsRunning(false);
   };
 
-  const animateSort = (algorithm: "bubble" | "merge") => {
+  const animateSort = (algorithm: "bubble" | "merge" | "quick") => {
     let animations: AnimationsArray = [];
     switch (algorithm) {
-      case 'bubble': 
-        dispatch(setHeader("BubbleSort *Running*"));
+      case "bubble":
         animations = getBubbleSortAnimations(sortingArray);
+        dispatch(setHeader("BubbleSort *Running*"));
         break;
-      case 'merge':
-        dispatch(setHeader("MergeSort *Running*"));
+      case "merge":
         animations = getMergeSortAnimations(sortingArray);
+        dispatch(setHeader("MergeSort *Running*"));
+        break;
+      case "quick":
+        animations = getQuickSortAnimations(sortingArray);
+        dispatch(setHeader("QuickSort *Running*"));
         break;
     }
     const startTime = new Date().getTime();
@@ -89,7 +99,7 @@ function SortingArea() {
       setIsSorted(false);
 
       const newBarWidth = Math.floor(500 / newCount);
-      setBarWidth(`${newBarWidth}px`)
+      setBarWidth(`${newBarWidth}px`);
 
       const arrayToSort = generateArray(newCount);
       dispatch(setArray(arrayToSort));
@@ -107,7 +117,12 @@ function SortingArea() {
         {sortingArray.map((el) => (
           <div
             key={el.value}
-            style={{ height: el.value, backgroundColor: el.color, width: barWidth, marginLeft: '2px' }}
+            style={{
+              height: el.value,
+              backgroundColor: el.color,
+              width: barWidth,
+              marginLeft: "2px",
+            }}
           />
         ))}
       </SortingBars>
@@ -133,19 +148,30 @@ function SortingArea() {
             onChange={!isRunning ? delaySliderHandler : undefined}
           />
         </SliderWrapper>
-        <SortingActions>
-          <Button onClick={resetArray}>Reset</Button>
-          <Button
-            onClick={!isRunning && !isSorted ? () => animateSort('bubble') : undefined}
-          >
-            BubbleSort
-          </Button>
-          <Button
-            onClick={!isRunning && !isSorted ? () => animateSort('merge') : undefined}
-          >
-            MergeSort
-          </Button>
-        </SortingActions>
+        <Button onClick={resetArray}>Reset</Button>
+      </SortingControls>
+      <SortingControls>
+        <Button
+          onClick={
+            !isRunning && !isSorted ? () => animateSort("bubble") : undefined
+          }
+        >
+          BubbleSort
+        </Button>
+        <Button
+          onClick={
+            !isRunning && !isSorted ? () => animateSort("merge") : undefined
+          }
+        >
+          MergeSort
+        </Button>
+        <Button
+          onClick={
+            !isRunning && !isSorted ? () => animateSort("quick") : undefined
+          }
+        >
+          QuickSort
+        </Button>
       </SortingControls>
     </>
   );

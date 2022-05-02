@@ -3,7 +3,7 @@ import styled from "styled-components";
 export const SortingBars = styled.div`
   width: 100%;
   margin: 0 auto;
-  height: 520px;
+  height: 460px;
   padding: 30px 10px;
   display: flex;
   justify-content: center;
@@ -34,11 +34,17 @@ export const SortingActions = styled.div`
   gap: 20px;
 `;
 
+export const SortingAlgos = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 20px;
+`;
+
 export const Button = styled.button`
   padding: 0.5rem 1rem;
   background: white;
-  border: 2px solid ${({theme}) => theme.mainColor};
-  color: ${({theme}) => theme.mainColor};
+  border: 2px solid ${({ theme }) => theme.mainColor};
+  color: ${({ theme }) => theme.mainColor};
   font-size: 1.2rem;
   font-weight: bold;
   outline: none;
@@ -47,7 +53,7 @@ export const Button = styled.button`
   border-radius: 5px;
 
   &:hover {
-    background: ${({theme}) => theme.mainColor};
+    background: ${({ theme }) => theme.mainColor};
     color: white;
   }
 
@@ -65,7 +71,7 @@ export const SliderWrapper = styled.div`
 `;
 
 export const SliderTitle = styled.span`
-  color: ${({theme}) => theme.mainColor};
+  color: ${({ theme }) => theme.mainColor};
   margin-bottom: 5px;
 `;
 
@@ -86,13 +92,13 @@ export const Slider = styled.input`
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: ${({theme}) => theme.mainColor};
+    background: ${({ theme }) => theme.mainColor};
   }
 
   &::-moz-range-thumb {
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: ${({theme}) => theme.mainColor};
+    background: ${({ theme }) => theme.mainColor};
   }
 `;

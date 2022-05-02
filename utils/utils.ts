@@ -3,6 +3,7 @@ import {
   swapElements,
   ObjectArray,
   moveElement,
+  setPivot,
   goodPair,
   wrongPair,
 } from "../store/arraySlice";
@@ -11,8 +12,8 @@ import { mainTheme } from "../theme";
 export const generateArray = (length: number) => {
   const newArray = [];
   for (let i = 0; i < length; i++) {
-    // 20-460 numbers
-    const number = Math.random() * 440 + 20;
+    // 20-400 numbers
+    const number = +(Math.random() * 380 + 20).toFixed(3);
     newArray.push({ value: number, color: mainTheme.mainColor });
   }
   return newArray;
@@ -33,7 +34,6 @@ export const bubbleSort = (arr: ObjectArray, animations: AnimationsArray) => {
         goodPair({
           idx1: j,
           idx2: j + 1,
-          deactivateAll: true,
           justChecking: true,
         })
       );
@@ -79,7 +79,7 @@ export const mergeSort = (
   );
 };
 
-// Helper mutable function for merge sort
+// Helper mutable function for merge sort, intended for right-to-left moves
 const moveItem = (array: ObjectArray, itemIdx: number, toIdx: number) => {
   const item = array[itemIdx];
   array.splice(itemIdx, 1);
@@ -105,7 +105,6 @@ const merge = (
       goodPair({
         idx1: firstIdx,
         idx2: secondIdx,
-        deactivateAll: true,
         justChecking: true,
       })
     );
@@ -134,6 +133,60 @@ const merge = (
 export const getMergeSortAnimations = (array: any) => {
   const animationArr: AnimationsArray = [];
   mergeSort(array.slice(), array, animationArr);
+  animationArr.push(allSorted());
+  return animationArr;
+};
+
+const quickSort = (array: any[], leftIdx: number, rightIdx: number, animations: AnimationsArray) => {
+  if (leftIdx >= rightIdx) return;
+
+  const pivotIdx = partition(array, leftIdx, rightIdx, animations);
+
+  quickSort(array, leftIdx, pivotIdx - 1, animations);
+  quickSort(array, pivotIdx + 1, rightIdx, animations);
+};
+
+const partition = (
+  array: any[],
+  leftIdx: number,
+  rightIdx: number,
+  animations: AnimationsArray
+): number => {
+  const pivot = array[rightIdx];
+  animations.push(setPivot(rightIdx));
+  // console.log("--------------------");
+  // console.log(`Pivot: ${pivot}`);
+  let i = leftIdx - 1;
+  let j = leftIdx;
+  while (j < rightIdx) {
+    if (i >= 0) animations.push(goodPair({ idx1: i, idx2: j, justChecking: true }))
+    if (array[j] <= pivot) {
+      i++;
+      if (i !== j) {
+        animations.push(wrongPair({ idx1: i, idx2: j }));
+        animations.push(swapElements({ idx1: i, idx2: j }));
+        animations.push(goodPair({ idx1: i, idx2: j }))
+        swap(array, i, j);
+      }
+    }
+    j++;
+  }
+  animations.push(wrongPair({ idx1: i + 1, idx2: j }));
+  animations.push(swapElements({ idx1: i + 1, idx2: rightIdx }))
+  animations.push(goodPair({ idx1: i + 1, idx2: j }));
+  swap(array, i + 1, rightIdx);
+  return i + 1;
+};
+
+const swap = (array: any[], idx1: number, idx2: number) => {
+  const temp = array[idx2];
+  array[idx2] = array[idx1];
+  array[idx1] = temp;
+};
+
+export const getQuickSortAnimations = (array: ObjectArray) => {
+  const animationArr: AnimationsArray = [];
+  quickSort(array.map(el => el.value), 0, array.length - 1, animationArr);
   animationArr.push(allSorted());
   return animationArr;
 };
