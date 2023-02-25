@@ -53,7 +53,7 @@ function SortingArea() {
     setIsRunning(false);
   };
 
-  const animateSort = (algorithm: "bubble" | "merge" | "quick") => {
+  const animateSort = (algorithm: "bubble" | "merge" | "quick-lomuto" | "quick-hoare") => {
     let animations: AnimationsArray = [];
     switch (algorithm) {
       case "bubble":
@@ -64,8 +64,12 @@ function SortingArea() {
         animations = getMergeSortAnimations(sortingArray);
         dispatch(setHeader("MergeSort *Running*"));
         break;
-      case "quick":
-        animations = getQuickSortAnimations(sortingArray);
+      case "quick-lomuto":
+        animations = getQuickSortAnimations(sortingArray, 'lomuto');
+        dispatch(setHeader("QuickSort *Running*"));
+        break;
+      case "quick-hoare":
+        animations = getQuickSortAnimations(sortingArray, 'hoare');
         dispatch(setHeader("QuickSort *Running*"));
         break;
     }
@@ -155,6 +159,7 @@ function SortingArea() {
           onClick={
             !isRunning && !isSorted ? () => animateSort("bubble") : undefined
           }
+          title="BubbleSort - the least efficient of them all"
         >
           BubbleSort
         </Button>
@@ -162,15 +167,25 @@ function SortingArea() {
           onClick={
             !isRunning && !isSorted ? () => animateSort("merge") : undefined
           }
+          title="MergeSort - the hardest to animate :)"
         >
           MergeSort
         </Button>
         <Button
           onClick={
-            !isRunning && !isSorted ? () => animateSort("quick") : undefined
+            !isRunning && !isSorted ? () => animateSort("quick-lomuto") : undefined
           }
+          title="QuickSort w/ Lomuto - simpler & less efficient than Hoare - partitioning scheme"
         >
-          QuickSort
+          QuickSort (Lomuto)
+        </Button>
+        <Button
+          onClick={
+            !isRunning && !isSorted ? () => animateSort("quick-hoare") : undefined
+          }
+          title="QuickSort w/ Hoare - the OG & the most efficient - partitioning scheme"
+        >
+          QuickSort (Hoare)
         </Button>
       </SortingControls>
     </>

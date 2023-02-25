@@ -5,9 +5,9 @@ import {
   moveElement,
   setPivot,
   goodPair,
-  wrongPair,
-} from "../store/arraySlice";
-import { mainTheme } from "../theme";
+  wrongPair
+} from '../store/arraySlice';
+import { mainTheme } from '../theme';
 
 export const generateArray = (length: number) => {
   const newArray = [];
@@ -24,6 +24,8 @@ export type AnimationsArray = {
   payload: any;
 }[];
 
+type PartitionScheme = 'lomuto' | 'hoare';
+
 export const bubbleSort = (arr: ObjectArray, animations: AnimationsArray) => {
   const array = arr.slice();
   const length = array.length;
@@ -34,7 +36,7 @@ export const bubbleSort = (arr: ObjectArray, animations: AnimationsArray) => {
         goodPair({
           idx1: j,
           idx2: j + 1,
-          justChecking: true,
+          justChecking: true
         })
       );
       if (array[j].value > array[j + 1].value) {
@@ -105,7 +107,7 @@ const merge = (
       goodPair({
         idx1: firstIdx,
         idx2: secondIdx,
-        justChecking: true,
+        justChecking: true
       })
     );
     if (lArr[lIdx].value < rArr[rIdx].value) {
@@ -137,13 +139,23 @@ export const getMergeSortAnimations = (array: any) => {
   return animationArr;
 };
 
-const quickSort = (array: any[], leftIdx: number, rightIdx: number, animations: AnimationsArray) => {
+const quickSort = (
+  array: any[],
+  leftIdx: number,
+  rightIdx: number,
+  animations: AnimationsArray,
+  partitionScheme: PartitionScheme
+) => {
   if (leftIdx >= rightIdx) return;
 
-  const pivotIdx = partition(array, leftIdx, rightIdx, animations);
+  // const pivotIdx = partition(array, leftIdx, rightIdx, animations);
+  const pivotIdx =
+    partitionScheme === 'lomuto'
+      ? partition(array, leftIdx, rightIdx, animations)
+      : partitionHoare(array, leftIdx, rightIdx, animations);
 
-  quickSort(array, leftIdx, pivotIdx - 1, animations);
-  quickSort(array, pivotIdx + 1, rightIdx, animations);
+  quickSort(array, leftIdx, pivotIdx - 1, animations, partitionScheme);
+  quickSort(array, pivotIdx + 1, rightIdx, animations, partitionScheme);
 };
 
 const partition = (
@@ -159,23 +171,55 @@ const partition = (
   let i = leftIdx - 1;
   let j = leftIdx;
   while (j < rightIdx) {
-    if (i >= 0) animations.push(goodPair({ idx1: i, idx2: j, justChecking: true }))
+    if (i >= 0)
+      animations.push(goodPair({ idx1: i, idx2: j, justChecking: true }));
     if (array[j] <= pivot) {
       i++;
       if (i !== j) {
         animations.push(wrongPair({ idx1: i, idx2: j }));
         animations.push(swapElements({ idx1: i, idx2: j }));
-        animations.push(goodPair({ idx1: i, idx2: j }))
+        animations.push(goodPair({ idx1: i, idx2: j }));
         swap(array, i, j);
       }
     }
     j++;
   }
   animations.push(wrongPair({ idx1: i + 1, idx2: j }));
-  animations.push(swapElements({ idx1: i + 1, idx2: rightIdx }))
+  animations.push(swapElements({ idx1: i + 1, idx2: rightIdx }));
   animations.push(goodPair({ idx1: i + 1, idx2: j }));
   swap(array, i + 1, rightIdx);
   return i + 1;
+};
+
+const partitionHoare = (
+  array: any[],
+  leftIdx: number,
+  rightIdx: number,
+  animations: AnimationsArray
+): number => {
+  const pivot = array[leftIdx];
+  animations.push(setPivot(leftIdx));
+
+  let i = leftIdx;
+  let j = rightIdx;
+  while (true) {
+    while (array[i] < pivot) {
+      animations.push(goodPair({ idx1: i, idx2: j, justChecking: true }));
+      i++;
+    }
+
+    while (array[j] > pivot) {
+      animations.push(goodPair({ idx1: i, idx2: j, justChecking: true }));
+      j--;
+    }
+
+    if (i >= j) return j;
+
+    animations.push(wrongPair({ idx1: i, idx2: j }));
+    animations.push(swapElements({ idx1: i, idx2: j }));
+    animations.push(goodPair({ idx1: i, idx2: j }));
+    swap(array, i, j);
+  }
 };
 
 const swap = (array: any[], idx1: number, idx2: number) => {
@@ -184,9 +228,15 @@ const swap = (array: any[], idx1: number, idx2: number) => {
   array[idx1] = temp;
 };
 
-export const getQuickSortAnimations = (array: ObjectArray) => {
+export const getQuickSortAnimations = (array: ObjectArray, partitionScheme: PartitionScheme) => {
   const animationArr: AnimationsArray = [];
-  quickSort(array.map(el => el.value), 0, array.length - 1, animationArr);
+  quickSort(
+    array.map((el) => el.value),
+    0,
+    array.length - 1,
+    animationArr,
+    partitionScheme
+  );
   animationArr.push(allSorted());
   return animationArr;
 };
